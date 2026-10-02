@@ -9,7 +9,7 @@ environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
 import moviepy as mp
 
-STEP = 32
+QUANT = 32
 repeated=False
 
 scale = np.array(list("$@B%8&WM#*oahkbdpqwmZO0QLC()1{}[]?-_+~<>i!lI;:,\"^`"))
@@ -17,13 +17,15 @@ scale = np.array(list("$@B%8&WM#*oahkbdpqwmZO0QLC()1{}[]?-_+~<>i!lI;:,\"^`"))
 width = int(subprocess.check_output(["tput", "cols"]))-1
 height = int(subprocess.check_output(["tput", "lines"]))-1
 
+if not os.path.exists("cache"):
+    os.makedirs("cache")
 videoname=sys.argv[1]
 video = cv2.VideoCapture(videoname)
 original_fps = video.get(cv2.CAP_PROP_FPS)
 vidlen=int(video.get(cv2.CAP_PROP_FRAME_COUNT))
 frame_step = max(1, (int(original_fps/12) if original_fps%12<6 else int(original_fps/12)+1))
 effective_fps = original_fps / frame_step
-fname=os.path.splitext(videoname)[0]+"_"+str(width)+","+str(height)+"_"+str(STEP)+".cache"
+fname="cache/"+os.path.splitext(videoname)[0]+"_"+str(width)+","+str(height)+"_"+str(QUANT)+".cache"
 print("Video file found")
 pygame.mixer.init()
 
@@ -31,7 +33,7 @@ def get_audio_sound_object(video_path):
     video = mp.VideoFileClip(video_path)
     audio = video.audio
     if video.audio is not None:
-        audio.write_audiofile("audio.mp3",logger=None)
+        audio.write_audiofile("cache/audio.mp3",logger=None)
         audio.close()
 
     video.close()
@@ -53,7 +55,7 @@ def makeframes(frame_id=0):
                 ind = (lum / 255.0 * (len(scale) - 1)).astype(int)
                 chars = scale[ind]
 
-                q = (rgb // STEP * STEP + STEP // 2).clip(0, 255).astype(np.uint8)
+                q = (rgb // QUANT * QUANT + QUANT // 2).clip(0, 255).astype(np.uint8)
                 key = (q[:, :, 0].astype(np.uint32) << 16) | (q[:, :, 1].astype(np.uint32) << 8) | q[:, :, 2]
                 changed = np.ones(key.shape, dtype=bool)
                 changed[:, 1:] = key[:, 1:] != key[:, :-1]
@@ -71,7 +73,7 @@ print('\n')
 if not os.path.exists(fname):
     makeframes()
 
-pygame.mixer.music.load("audio.mp3")
+pygame.mixer.music.load("cache/audio.mp3")
 pygame.mixer.music.play()
 with open(fname, "rb") as file:
     while True:

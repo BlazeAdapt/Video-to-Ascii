@@ -22,7 +22,7 @@ Frames are converted first, and saved to a cache so the next playback of the sam
 Python packages:
 
 ```bash
-pip install opencv-python numpy pygame
+pip install opencv-python numpy pygame moviepy
 ```
 
 ## Usage

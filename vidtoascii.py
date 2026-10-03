@@ -26,38 +26,42 @@ def get_audio_sound_object(video_path):
     video.close()
     print("Audio file extracted successfully")
     return
-def makeframes(frame_id=0):
-    with open(fname, "wb") as file:
-        while True:
-            success, image = video.read()
-            if not success:
-                break
-            if frame_id % frame_step == 0:
-                percentage=int(frame_id/vidlen*100)
-                sys.stdout.write("\rConverting frames to ascii [" + int(percentage/10)*"#"+"-"+(9-int(percentage/10))*" "+"]"+f" {percentage}%")
-                sys.stdout.flush()
-                resized = cv2.resize(image, (width+1 , height+1 ), interpolation=cv2.INTER_AREA)
-                rgb = cv2.cvtColor(resized, cv2.COLOR_BGR2RGB)
-                lum = (0.2126 * rgb[:, :, 0] + 0.7152 * rgb[:, :, 1] + 0.0722 * rgb[:, :, 2])
-                ind = (lum / 255.0 * (len(scale) - 1)).astype(int)
-                chars = scale[ind]
 
-                q = (rgb // QUANT * QUANT + QUANT // 2).clip(0, 255).astype(np.uint8)
-                key = (q[:, :, 0].astype(np.uint32) << 16) | (q[:, :, 1].astype(np.uint32) << 8) | q[:, :, 2]
-                changed = np.ones(key.shape, dtype=bool)
-                changed[:, 1:] = key[:, 1:] != key[:, :-1]
-
-                esc = ("\033[38;2;" + q[:, :, 0].astype(str) + ";" + q[:, :, 1].astype(str)+ ";" + q[:, :, 2].astype(str) + "m")
-                esc = np.where(changed, esc, "")
-                grid = np.char.add(esc, chars)
-                output = "\033[H" + "\n".join("".join(row) for row in grid)
-                data = output.encode("utf-8")
-                file.write(len(data).to_bytes(4, "little"))
-                file.write(data)
-            frame_id += 1
 def main():
     width = int(subprocess.check_output(["tput", "cols"]))-1
     height = int(subprocess.check_output(["tput", "lines"]))-1
+
+    def makeframes(frame_id=0):
+        with open(fname, "wb") as file:
+            while True:
+                success, image = video.read()
+                if not success:
+                    break
+                if frame_id % frame_step == 0:
+                    percentage = int(frame_id / vidlen * 100)
+                    sys.stdout.write("\rConverting frames to ascii [" + int(percentage / 10) * "#" + "-" + (
+                                9 - int(percentage / 10)) * " " + "]" + f" {percentage}%")
+                    sys.stdout.flush()
+                    resized = cv2.resize(image, (width + 1, height + 1), interpolation=cv2.INTER_AREA)
+                    rgb = cv2.cvtColor(resized, cv2.COLOR_BGR2RGB)
+                    lum = (0.2126 * rgb[:, :, 0] + 0.7152 * rgb[:, :, 1] + 0.0722 * rgb[:, :, 2])
+                    ind = (lum / 255.0 * (len(scale) - 1)).astype(int)
+                    chars = scale[ind]
+
+                    q = (rgb // QUANT * QUANT + QUANT // 2).clip(0, 255).astype(np.uint8)
+                    key = (q[:, :, 0].astype(np.uint32) << 16) | (q[:, :, 1].astype(np.uint32) << 8) | q[:, :, 2]
+                    changed = np.ones(key.shape, dtype=bool)
+                    changed[:, 1:] = key[:, 1:] != key[:, :-1]
+
+                    esc = ("\033[38;2;" + q[:, :, 0].astype(str) + ";" + q[:, :, 1].astype(str) + ";" + q[
+                        :, :, 2].astype(str) + "m")
+                    esc = np.where(changed, esc, "")
+                    grid = np.char.add(esc, chars)
+                    output = "\033[H" + "\n".join("".join(row) for row in grid)
+                    data = output.encode("utf-8")
+                    file.write(len(data).to_bytes(4, "little"))
+                    file.write(data)
+                frame_id += 1
 
     if not os.path.exists("cache"):
         os.makedirs("cache")
@@ -92,3 +96,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

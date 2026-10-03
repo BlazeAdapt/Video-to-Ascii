@@ -14,20 +14,7 @@ repeated=False
 
 scale = np.array(list("$@B%8&WM#*oahkbdpqwmZO0QLC()1{}[]?-_+~<>i!lI;:,\"^`"))
 
-width = int(subprocess.check_output(["tput", "cols"]))-1
-height = int(subprocess.check_output(["tput", "lines"]))-1
 
-if not os.path.exists("cache"):
-    os.makedirs("cache")
-videoname=sys.argv[1]
-video = cv2.VideoCapture(videoname)
-original_fps = video.get(cv2.CAP_PROP_FPS)
-vidlen=int(video.get(cv2.CAP_PROP_FRAME_COUNT))
-frame_step = max(1, (int(original_fps/12) if original_fps%12<6 else int(original_fps/12)+1))
-effective_fps = original_fps / frame_step
-fname="cache/"+os.path.splitext(videoname)[0]+"_"+str(width)+","+str(height)+"_"+str(QUANT)+".cache"
-print("Video file found")
-pygame.mixer.init()
 
 def get_audio_sound_object(video_path):
     video = mp.VideoFileClip(video_path)
@@ -68,24 +55,40 @@ def makeframes(frame_id=0):
                 file.write(len(data).to_bytes(4, "little"))
                 file.write(data)
             frame_id += 1
-get_audio_sound_object(videoname)
-print('\n')
-if not os.path.exists(fname):
-    makeframes()
+def main():
+    width = int(subprocess.check_output(["tput", "cols"]))-1
+    height = int(subprocess.check_output(["tput", "lines"]))-1
 
-pygame.mixer.music.load("cache/audio.mp3")
-pygame.mixer.music.play()
-with open(fname, "rb") as file:
-    while True:
-        size_bytes = file.read(4)
-        if not size_bytes:
-            break
-        size = int.from_bytes(size_bytes, "little")
-        data = file.read(size)
-        frame = data.decode("utf-8")
-        sys.stdout.write(f"\033[{height}A")
-        sys.stdout.write(f"\r{frame}")
-        sys.stdout.flush()
-        time.sleep(1.0 / effective_fps)
+    if not os.path.exists("cache"):
+        os.makedirs("cache")
+    videoname=sys.argv[1]
+    video = cv2.VideoCapture(videoname)
+    original_fps = video.get(cv2.CAP_PROP_FPS)
+    vidlen=int(video.get(cv2.CAP_PROP_FRAME_COUNT))
+    frame_step = max(1, (int(original_fps/12) if original_fps%12<6 else int(original_fps/12)+1))
+    effective_fps = original_fps / frame_step
+    fname="cache/"+os.path.splitext(videoname)[0]+"_"+str(width)+","+str(height)+"_"+str(QUANT)+".cache"
+    print("Video file found")
+    pygame.mixer.init()
+    get_audio_sound_object(videoname)
+    print('\n')
+    if not os.path.exists(fname):
+        makeframes()
 
+    pygame.mixer.music.load("cache/audio.mp3")
+    pygame.mixer.music.play()
+    with open(fname, "rb") as file:
+        while True:
+            size_bytes = file.read(4)
+            if not size_bytes:
+                break
+            size = int.from_bytes(size_bytes, "little")
+            data = file.read(size)
+            frame = data.decode("utf-8")
+            sys.stdout.write(f"\033[{height}A")
+            sys.stdout.write(f"\r{frame}")
+            sys.stdout.flush()
+            time.sleep(1.0 / effective_fps)
 
+if __name__ == "__main__":
+    main()

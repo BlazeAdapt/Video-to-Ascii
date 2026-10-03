@@ -1,3 +1,4 @@
+
 # Video To Ascii Art
 
 Play any video in your terminal as colored ASCII art, with audio.
@@ -15,8 +16,7 @@ Frames are converted first, and saved to a cache so the next playback of the sam
 - **Clean terminal handling**: uses the alternate screen, hides the cursor, and restores everything on exit
 ## Demo
 
-<img width="640" height="480" alt="demo" src="https://github.com/user-attachments/assets/da60866f-d933-4672-b212-72d1d3c67798" />
-
+<img width="640" height="480" alt="VideoProject22-ezgif com-optimize" src="https://github.com/user-attachments/assets/dad25977-cdbf-4833-9604-25463a2060b6" />
 
 ## Requirements
 
@@ -35,6 +35,8 @@ pip install opencv-python numpy pygame moviepy
 python vidtoascii.py path/to/video.mp4
 ```
 Unless `tput` is supported on your terminal, You will have to swap the `width` and `height` in the code to whatever your terminal supports.
+
+For windows terminal:
 ```python
 import shutil
 width, height = shutil.get_terminal_size()

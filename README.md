@@ -13,6 +13,10 @@ Frames are converted first, and saved to a cache so the next playback of the sam
 - **Per-video cache**: a finished dump is reused automatically on later runs
 - **Aspect-ratio correction**: output fits your terminal without looking stretched
 - **Clean terminal handling**: uses the alternate screen, hides the cursor, and restores everything on exit
+## Demo
+
+<img width="640" height="480" alt="demo" src="https://github.com/user-attachments/assets/da60866f-d933-4672-b212-72d1d3c67798" />
+
 
 ## Requirements
 
